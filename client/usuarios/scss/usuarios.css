@@ -1,0 +1,21 @@
+#buscador__container {
+  width: 80%;
+  margin: 140px auto 20px auto;
+}
+
+.table__container {
+  width: 80%;
+  margin: auto;
+}
+.table__container table {
+  overflow: hidden;
+  border: 1px solid rgb(176, 176, 176);
+}
+
+.paginacion {
+  width: 80%;
+  margin: auto;
+  margin-top: 15px;
+}
+
+/*# sourceMappingURL=usuarios.css.map */

@@ -1,0 +1,102 @@
+body {
+    background: #16222A;
+    /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #3A6073, #16222A);
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #3A6073, #16222A);
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    color: white;
+    overflow: hidden;
+}
+
+// Background de logos
+.logos-bg__container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+
+    .logos {
+        position: relative;
+        display: flex;
+
+        span {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.075);
+            border-radius: 50%;
+            box-shadow: 0 0 0 10px #a5a5a51f,
+                0 0 50px rgba(255, 255, 255, 0.071),
+                0 0 100px rgba(255, 255, 255, 0.061);
+            animation: animate 15s linear infinite;
+            animation-duration: calc(125s / var(--i));
+
+            img {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    }
+}
+
+@keyframes animate {
+    0% {
+        transform: translateY(100vh) scale(0.6);
+        opacity: 10%;
+    }
+
+    100% {
+        transform: translateY(-10vh) scale(1);
+        opacity: 60%;
+    }
+}
+
+// Card
+main {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    margin: auto;
+    display: grid;
+    place-items: center;
+
+    .card {
+        width: 50%;
+        min-width: 400px;
+        padding: 50px 10px;
+        border-radius: 20px;
+        text-align: center;
+        background: rgba(187, 187, 187, 0.124);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        border: 1.5px solid rgba(209, 213, 219, 0.3);
+
+        .card__button {
+            margin-top: 20px;
+
+            .btn__usuarios {
+                background-image: linear-gradient(to right, #203A43 0%, #3A6073 51%, #203A43 100%);
+                // border: 1px solid white;
+                border-radius: 100px;
+                background-size: 200% auto;
+                padding: 15px;
+                width: 70%;
+                max-width: 350px;
+                min-width: 150px;
+                color: white;
+                transition: 0.5s;
+                text-transform: uppercase;
+                font-weight: 500;
+                outline: none;
+                border: 1.5px solid rgba(209, 213, 219, 0.3);
+
+                &:hover {
+                    background-position: right center;
+                }
+            }
+        }
+    }
+}
