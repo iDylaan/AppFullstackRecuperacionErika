@@ -3,6 +3,7 @@ from flask_cors import cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
 from src import mongo
 from bson import json_util
+from flask_cors import CORS
 from bson.objectid import ObjectId
 
 # MODULE
@@ -12,7 +13,9 @@ mod = Blueprint('usuarios', __name__,
     static_url_path='/%s' % __name__
 )
 
-# CORS Configure Parameters
+CORS(mod)
+
+
 @mod.route('/users', methods=['OPTIONS'])
 def handle_options():
     return "", 200, {
