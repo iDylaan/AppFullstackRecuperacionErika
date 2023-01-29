@@ -106,6 +106,7 @@ def update_user(id):
     res = None
     try:
         data = request.get_json()
+        print(data)
         errors = val_req_data(data, user_schema)
 
         if errors:
@@ -121,7 +122,7 @@ def update_user(id):
         level = request.json['level']
         if data:
             hashed_pass = generate_password_hash(password)
-            result = mongo.db.users.update_one({'_id': ObjectId( id )},{'$set': {
+            res = mongo.db.users.update_one({'_id': ObjectId( id )},{'$set': {
                 'username': username,
                 'email': email,
                 'password': hashed_pass,

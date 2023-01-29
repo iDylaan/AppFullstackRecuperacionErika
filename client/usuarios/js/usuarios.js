@@ -118,7 +118,6 @@
     };
 
     function generarRowUser(user) {
-        console.log(user)
         let {id, username, email, title, area, state, level} = user;
         state = state[0].toUpperCase() + state.slice(1).toLowerCase();
         level = level[0].toUpperCase() + level.slice(1).toLowerCase();
@@ -181,7 +180,6 @@
                 url: URL + ROUTE,
                 data: data
             })
-            console.log(response);
 
             if (response.statusText !== 'OK') {
                 throw new Error({
