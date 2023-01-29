@@ -1,10 +1,14 @@
+import json
 from flask import Blueprint, request, jsonify, Response
-from flask_cors import cross_origin
+from flask_cors import cross_origin, CORS
+from cerberus import Validator
 from werkzeug.security import generate_password_hash, check_password_hash
 from src import mongo
 from bson import json_util
-from flask_cors import CORS
 from bson.objectid import ObjectId
+from .schemas import user_schema
+
+# TODO: Loggear todos los excepts
 
 # MODULE
 mod = Blueprint('usuarios', __name__, 
@@ -12,10 +16,10 @@ mod = Blueprint('usuarios', __name__,
     static_folder='static', 
     static_url_path='/%s' % __name__
 )
-
+# CORS acces to "users"
 CORS(mod)
 
-
+# CORS Configure Parameters
 @mod.route('/users', methods=['OPTIONS'])
 def handle_options():
     return "", 200, {
@@ -24,19 +28,46 @@ def handle_options():
         "Access-Control-Allow-Headers": "Content-Type"
     }
 
+
+# Schemas validate
+def val_req_data(data, schema): # validate request data
+    v = Validator(schema)
+    if not v.validate(data):
+        return jsonify({"errors": v.errors}), 400
+    return None
+
+
 # ROUTES
 @mod.route('/users', methods=['GET'])
 def get_users():
-    response = None
+    res = None
     try:
+        users_res = []
         users = mongo.db.users.find()
-        response = json_util.dumps(users)
+        res = json_util.dumps(users)
+        users = json.loads(res)
+        for user in users:
+            user_id = dict(user['_id'])
+            oid = user_id['$oid']
+            users_res.append({
+                "id": oid,
+                "username": user['username'],
+                "email": user['email'],
+                "password": user['password'],
+                "title": user['title'],
+                "area": user['area'],
+                "state": user['state'],
+                "level": user['level'] 
+            })
+        return jsonify(users_res)
     except Exception as e:
         print("Ha sucedido un error en @users: {}".format(e))
-    return Response(response, mimetype='application/json')
+    if not res:
+        return jsonify({ "message": "Error inesperado en el servidor", "status": 500 })
 
 
-@mod.route('/users/<id>', methods=['GET'])
+
+@mod.route('/users/<string:id>', methods=['GET'])
 def get_user(id):
     res = None
     try:
@@ -45,33 +76,42 @@ def get_user(id):
             res = json_util.dumps(user)
         else:
             return user_not_found()
+        return res
     except Exception as e:
         print("Ha sucedido el siguiente error en @users/{}: {}".format(str(id), e))
-    return Response(res, mimetype='application/json')
+    if not res:
+        return jsonify({ "message": "Error inesperado en el servidor", "status": 500 })
 
 
 
-@mod.route('/users/<id>', methods=['DELETE'])
+@mod.route('/users/<string:id>', methods=['DELETE'])
 def delete_user(id):
     res = None
     try:
-        oid = ObjectId(id)
-        user = mongo.db.users.find_one(oid)
+        user = mongo.db.users.find_one(ObjectId( id ))
         if user:
-            mongo.db.users.delete_one({'_id': oid})
-            message = {'message': 'User ' + id + ' was deleted successfully', 'status': 200}
-            res = jsonify(message)
+            mongo.db.users.delete_one({'_id': ObjectId( id )})
+            message = {'message': 'User {} was deleted successfully'.format( id ), 'status': 200}
+            return jsonify(message)
         else:
             return  user_not_found()
     except Exception as e:
         print('Ha sucedido un error al intentar eliminar en @users/{}: {}'.format(str(id), e))
-    return res
+    if not res:
+        return jsonify({ "message": "Error inesperado en el servidor", "status": 500 })
 
 
-@mod.route('/users/<id>', methods=['PUT'])
+@mod.route('/users/<string:id>', methods=['PUT'])
 def update_user(id):
     res = None
     try:
+        data = request.get_json()
+        errors = val_req_data(data, user_schema)
+
+        if errors:
+            print(errors)
+            return {"errors": errors}, 400
+
         username = request.json['username']
         email = request.json['email']
         password = request.json['password']
@@ -79,7 +119,7 @@ def update_user(id):
         area = request.json['area']
         state = request.json['state']
         level = request.json['level']
-        if username and email and password:
+        if data:
             hashed_pass = generate_password_hash(password)
             result = mongo.db.users.update_one({'_id': ObjectId( id )},{'$set': {
                 'username': username,
@@ -91,24 +131,29 @@ def update_user(id):
                 'level': level
             }})
             message = {
-                    'message': 'User ' + id + 'was updated successfully',
+                    "message": 'User {} was updated successfully'.format( id ),
                     'status': 200
                 }
-            res = jsonify(message)
+            return jsonify(message)
         else:
             return  not_found()
     except Exception as e:
         print('Ha ocurrido un error en @users: {}'.format(e))
-    return res
+    if not res:
+        return jsonify({ "message": "Error inesperado en el servidor", "status": 500 })
 
 
 @mod.route('/users', methods=['POST'])
 def create_user():
-    username = None
-    email = None
-    password = None
-
+    res = None
     try:
+        data = request.get_json()
+        errors = val_req_data(data, user_schema)
+
+        if errors:
+            print(errors)
+            return {"errors": errors}, 400
+
         username = request.json['username']
         email = request.json['email']
         password = request.json['password']
@@ -116,9 +161,10 @@ def create_user():
         area = request.json['area']
         state = request.json['state']
         level = request.json['level']
-        if username and email and password:
+        
+        if data:
             hashed_pass = generate_password_hash(password)
-            user = { 
+            user = {
                 'username': username,
                 'email': email,
                 'password': hashed_pass,
@@ -127,9 +173,9 @@ def create_user():
                 'state': state,
                 'level': level 
             }
-            result = mongo.db.users.insert_one(user)
+            result = mongo.db.users.insert_one( user )
             id = result.inserted_id
-            response = {
+            res = {
                 'id': str(id),
                 'username': username,
                 'email': email,
@@ -139,12 +185,13 @@ def create_user():
                 'state': state,
                 'level': level
             }
-            return response
+            return jsonify(res)
         else:
             return  not_found()
     except Exception as e:
         print('Ha ocurrido un error en @users: {}'.format(e))
-    return  {'message': 'recived'}
+    if not res:
+        return jsonify({ "message": "Error inesperado en el servidor", "status": 500 })
 
 
 @mod.errorhandler(404)

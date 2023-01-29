@@ -12,7 +12,8 @@ load_dotenv(".env")
 app = Flask(__name__)
 
 ### CORS (Cross-Origin Resource Sharing) ### 
-CORS(app, supports_credentials=True, origins="*", methods=["GET", "POST", "PUT", "DELETE"], headers="*")
+# CORS(app, supports_credentials=True, origins="*", methods=["GET", "POST", "PUT", "DELETE"], headers="*")
+CORS(app)
 
 ### BASE DE DATOS ###
 ### MONGO DB ###

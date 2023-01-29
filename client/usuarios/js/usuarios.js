@@ -2,12 +2,13 @@
     // Selectores
     const inputUsers = document.querySelector('#input-users');
     const btnCreateUser = document.querySelector('#btn-register-user');
-    const btnsDeleteUser = document.querySelectorAll('.btn-delete-user');
 
     // Variables
-    const URL = 'http://127.0.0.1:5858/';
+    const URL = 'http://localhost:5858/';
+    const ROUTE = 'users';
     let users = []
     let user = {
+        id: '',
         username: '',
         email: '',
         password: '',
@@ -26,18 +27,8 @@
     function eventListeners() {
         inputUsers.addEventListener('keyup', validarBusqueda);
         btnCreateUser.addEventListener('click', validarCreateUserForm);
-        btnsDeleteUser.forEach(btnDelete => {
-            btnDelete.addEventListener('click', () => {
-                console.log('eliminando...');
-                deleteUser();
-            });
-        });
     };
 
-    // Eliminar Usuario
-    function deleteUser() {
-        console.log('Eliminando usuario...');
-    }
 
     // Validacion del formulario para registrar un usuario
     async function validarCreateUserForm(e) {
@@ -93,6 +84,7 @@
 
         if ( usuarios_array ) {
             usuarios_array.forEach(u => {
+                user.id = u.id;
                 user.username = u.username;
                 user.email = u.email;
                 user.password = u.password;
@@ -104,6 +96,21 @@
                 userRow = generarRowUser(user);
                 tbodyUser.appendChild(userRow);
             });
+
+            // Event Listener to delete a user
+            btnsDelete = tbodyUser.querySelectorAll('.btn-delete-user');
+            btnsDelete.forEach(btn => {
+                btn.addEventListener('click', async function deleteUser(e) {
+                    user_id = e.target.attributes["data-id"]["nodeValue"];
+                    const response = await axios({
+                        method: 'DELETE',
+                        url: URL + ROUTE + '/' + user_id
+                    })
+
+                    limpiarHTML();
+                    await listarUsuarios();
+                })
+            });
         } else {
             // TODO: Error 404
             // alert('Se produjo un error 404', usuarios_array);
@@ -111,7 +118,8 @@
     };
 
     function generarRowUser(user) {
-        let {username, email, title, area, state, level} = user;
+        console.log(user)
+        let {id, username, email, title, area, state, level} = user;
         state = state[0].toUpperCase() + state.slice(1).toLowerCase();
         level = level[0].toUpperCase() + level.slice(1).toLowerCase();
 
@@ -148,22 +156,25 @@
             </td>
             <td>${level}</td>
             <td>
-                <button type="button" class="btn btn-outline-primary btn-sm btn-rounded">
+                <a href="./user-editForm.html?id=${id}" type="button" class="btn btn-outline-primary btn-sm btn-rounded">
                     <i class="fa-solid fa-pen"></i>
-                </button>
-                <button type="button" class="btn btn-outline-danger btn-sm btn-rounded btn-delete-user">
+                </a>
+                <a type="button" class="btn btn-outline-danger btn-sm btn-rounded btn-delete-user" data-id="${id}">
                     <i class="fa-solid fa-trash"></i>
-                </button>
+                </a>
             </td>
         `;
         return row;
     }
 
-    // Consultas API con AXIOS
+    const limpiarHTML = () => {
+        const tbodyUser = document.querySelector('#tbody-users');
+        tbodyUser.innerHTML = '';
+    }
+
+    // Consumo de API con AXIOS
 
     async function agregarUsuario(data) {
-        const ROUTE = 'user';
-
         try {
             const response = await axios({
                 method: 'POST',
@@ -178,14 +189,14 @@
                 })
             }
             
+            limpiarHTML();
+            await listarUsuarios();
         } catch (error) {
             alert(`Ha ocurrido el siguiente error: ${error.message}`);
         }
     }
 
     async function getUsuarios() {
-        const ROUTE = 'users';
-
         try {
             const response = await axios({
                 method: 'GET',
