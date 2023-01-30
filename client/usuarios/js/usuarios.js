@@ -1,4 +1,4 @@
-(async () => {  // ( async () => {
+( () => {  // ( async () => {
     // Selectores
     const inputUsers = document.querySelector('#input-users');
     const btnCreateUser = document.querySelector('#btn-register-user');
@@ -167,22 +167,25 @@
 
     async function agregarUsuario(data) {
         try {
-            users = [...users, data];
-            limpiarHTML();
-            await listarUsuarios();
-
             const response = await axios({
                 method: 'POST',
                 url: URL + ROUTE,
                 data: data
             })
 
+            console.log(response);
+            // TODO obtener el id del doc donde se registra el usuario
+
+
             if (response.statusText !== 'OK') {
                 throw new Error({
                     message: 'Error'
                 })
             }
-            
+
+            users = [...users, data];
+            limpiarHTML();
+            await listarUsuarios();
         } catch (error) {
             alert(`Ha ocurrido el siguiente error: ${error.message}`);
         }
