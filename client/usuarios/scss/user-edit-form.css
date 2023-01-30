@@ -1,0 +1,52 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
+main {
+  height: 100vh;
+  width: 100%;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+  overflow: hidden;
+}
+
+.div__button-turn-back {
+  position: absolute;
+  border-radius: 100px;
+  outline: 1px solid white;
+  padding: 10px 20px;
+  margin-top: 20px;
+  margin-left: 20px;
+  transition: ease 0.15s all;
+}
+.div__button-turn-back:hover {
+  transition: ease 0.1s all;
+  background-color: #9dbaff;
+  border-radius: 5px;
+  outline: none;
+}
+.div__button-turn-back a {
+  text-decoration: none;
+  color: white;
+}
+
+.form__container {
+  background-color: #edeff4;
+  position: absolute;
+  width: 50%;
+  min-width: 400px;
+  max-width: 800px;
+  border: 1px solid rgb(186, 186, 186);
+  padding: 50px 20px;
+  border-radius: 20px;
+  box-shadow: 0px 0px 4.4px rgba(0, 0, 0, 0.017), 0px 0px 10.1px rgba(0, 0, 0, 0.024), 0px 0px 17.5px rgba(0, 0, 0, 0.03), 0px 0px 27.8px rgba(0, 0, 0, 0.035), 0px 0px 42.9px rgba(0, 0, 0, 0.04), 0px 0px 66.9px rgba(0, 0, 0, 0.046), 0px 0px 111.1px rgba(0, 0, 0, 0.053), 0px 0px 222px rgba(0, 0, 0, 0.07);
+}
+.form__container .title_container {
+  width: 100%;
+}
+.form__container .title_container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/*# sourceMappingURL=user-edit-form.css.map */

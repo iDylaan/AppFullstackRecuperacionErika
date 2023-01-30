@@ -1,4 +1,4 @@
-(() => {  // ( async () => {
+(async () => {  // ( async () => {
     // Selectores
     const inputUsers = document.querySelector('#input-users');
     const btnCreateUser = document.querySelector('#btn-register-user');
@@ -6,8 +6,8 @@
     // Variables
     const URL = 'http://localhost:5858/';
     const ROUTE = 'users';
-    let users = []
-    let user = {
+    let users = [];
+    let userObj = {
         id: '',
         username: '',
         email: '',
@@ -18,17 +18,18 @@
         level: ''
     }
 
+
     document.addEventListener('DOMContentLoaded', () => {
-        listarUsuarios();
         eventListeners();
     });
 
     // Events
-    function eventListeners() {
+    async function eventListeners() {
+        users = await getUsers();
+        listarUsuarios();
         inputUsers.addEventListener('keyup', validarBusqueda);
         btnCreateUser.addEventListener('click', validarCreateUserForm);
     };
-
 
     // Validacion del formulario para registrar un usuario
     async function validarCreateUserForm(e) {
@@ -53,14 +54,14 @@
             inputLevel === ''
         ){ console.log('Todos los campos son obligatorios');} 
         else {
-            user.username = inputName ;
-            user.email = inputEmail;
-            user.password = inputPassword;
-            user.title = inputTitle;
-            user.area = inputArea ;
-            user.state = inputState;
-            user.level = inputLevel;
-            await agregarUsuario(user);
+            userObj.username = inputName ;
+            userObj.email = inputEmail;
+            userObj.password = inputPassword;
+            userObj.title = inputTitle;
+            userObj.area = inputArea ;
+            userObj.state = inputState;
+            userObj.level = inputLevel;
+            await agregarUsuario(userObj);
         }
     }
 
@@ -77,44 +78,35 @@
 
     // Listar Usuarios
     async function listarUsuarios () {
-        const usuarios_array = await getUsuarios();
-
         // Selectores
         const tbodyUser = document.querySelector('#tbody-users');
 
-        if ( usuarios_array ) {
-            usuarios_array.forEach(u => {
-                user.id = u.id;
-                user.username = u.username;
-                user.email = u.email;
-                user.password = u.password;
-                user.title = u.title;
-                user.area = u.area;
-                user.state = u.state;
-                user.level = u.level;
-                users.push(user);
-                userRow = generarRowUser(user);
-                tbodyUser.appendChild(userRow);
-            });
 
-            // Event Listener to delete a user
-            btnsDelete = tbodyUser.querySelectorAll('.btn-delete-user');
-            btnsDelete.forEach(btn => {
-                btn.addEventListener('click', async function deleteUser(e) {
-                    user_id = e.target.attributes["data-id"]["nodeValue"];
+        users.forEach(user => {
+            userRow = generarRowUser(user);
+            tbodyUser.appendChild(userRow);
+        })
+
+
+        // Event Listener to delete a user
+        btnsDelete = tbodyUser.querySelectorAll('.btn-delete-user');
+        btnsDelete.forEach(btn => {
+            btn.addEventListener('click', async function deleteUser(e) {
+                user_id = e.target.attributes["data-id"]["nodeValue"];
+                user_data = await getUser(user_id);
+                const confirmar = confirm('¿Deseas eliminar a ' + user_data.username + '?');
+
+                if ( confirmar ) {
+                    users = users.filter(user => user.id !== user_id);
+                    limpiarHTML();
                     const response = await axios({
                         method: 'DELETE',
                         url: URL + ROUTE + '/' + user_id
                     })
-
-                    limpiarHTML();
                     await listarUsuarios();
-                })
-            });
-        } else {
-            // TODO: Error 404
-            // alert('Se produjo un error 404', usuarios_array);
-        }
+                }
+            })
+        });
     };
 
     function generarRowUser(user) {
@@ -156,10 +148,10 @@
             <td>${level}</td>
             <td>
                 <a href="./user-editForm.html?id=${id}" type="button" class="btn btn-outline-primary btn-sm btn-rounded">
-                    <i class="fa-solid fa-pen"></i>
+                    <i class="fa-solid fa-pen" data-id="${id}"></i>
                 </a>
                 <a type="button" class="btn btn-outline-danger btn-sm btn-rounded btn-delete-user" data-id="${id}">
-                    <i class="fa-solid fa-trash"></i>
+                    <i class="fa-solid fa-trash" data-id="${id}"></i>
                 </a>
             </td>
         `;
@@ -175,6 +167,10 @@
 
     async function agregarUsuario(data) {
         try {
+            users = [...users, data];
+            limpiarHTML();
+            await listarUsuarios();
+
             const response = await axios({
                 method: 'POST',
                 url: URL + ROUTE,
@@ -187,15 +183,14 @@
                 })
             }
             
-            limpiarHTML();
-            await listarUsuarios();
         } catch (error) {
             alert(`Ha ocurrido el siguiente error: ${error.message}`);
         }
     }
 
-    async function getUsuarios() {
+    async function getUsers() {
         try {
+            let usuarios_array = [];
             const response = await axios({
                 method: 'GET',
                 url: URL + ROUTE
@@ -211,5 +206,15 @@
             alert(`Ha ocurrido el siguiente error: ${error.message}`);
         }
     }
+
+
+    async function getUser(id) {
+        const user = await axios({
+            method: "GET",
+            url: URL + ROUTE + '/' + id
+        })
+
+        return user.data;
+    } 
 
 })();
