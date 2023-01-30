@@ -179,6 +179,8 @@
                 })
             }
 
+            console.log(response.data)
+
             users = [...users, response.data];
             limpiarHTML();
             await listarUsuarios();

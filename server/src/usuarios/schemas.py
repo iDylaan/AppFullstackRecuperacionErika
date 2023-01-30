@@ -40,8 +40,5 @@ user_schema = {
         "type": "string",
         "required": True,
         "empty": False
-    },
-    "review": {
-        "required": False
     }
 }
