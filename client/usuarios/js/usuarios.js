@@ -173,17 +173,13 @@
                 data: data
             })
 
-            console.log(response);
-            // TODO obtener el id del doc donde se registra el usuario
-
-
             if (response.statusText !== 'OK') {
                 throw new Error({
                     message: 'Error'
                 })
             }
 
-            users = [...users, data];
+            users = [...users, response.data];
             limpiarHTML();
             await listarUsuarios();
         } catch (error) {
